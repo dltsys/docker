@@ -1,0 +1,7 @@
+#!/bin/bash
+for N in `echo 1 2 3 4 5 6 7 8`; do
+    echo Node $N
+    sudo docker exec fullnode-$N tail -n1 /home/fullnode/.dashcore/debug.log
+    dash-cli -rpcconnect=127.0.0.1 -rpcport=1132$N -rpcuser=rpc -rpcpassword=123 getmininginfo | grep -w blocks
+    dash-cli -rpcconnect=127.0.0.1 -rpcport=1132$N -rpcuser=rpc -rpcpassword=123 getbalance
+done

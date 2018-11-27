@@ -1,0 +1,5 @@
+#!/bin/bash
+for N in `echo 1 2 3 4 5 6 7 8`; do
+    echo Removing node $N
+    sudo docker rm -f fullnode-$N
+done

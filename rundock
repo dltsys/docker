@@ -1,0 +1,38 @@
+#!/bin/bash
+rm -f node/dashd
+cp ~/dash-master/src/dashd node
+#ldd node/dashd | grep "lib" | grep -v "not found" | sed -re "s/.*=>//g;s/\(.*//g;s/^[ \t]+//g" | grep -v "^/lib" > node/libs.txt
+#for N in `cat node/libs.txt`; do
+#    LL=`dpkg -S $N | cut -d":" -f1`
+#    echo "	$LL \\"
+#done
+sudo docker build -t fullnode node
+
+for N in `echo 1 2 3 4 5 6 7 8`; do
+    echo Removing node $N
+    sudo docker rm -f fullnode-$N
+done
+
+sudo ./mkhosts
+for N in `echo 1 2 3 4 5 6 7 8`; do
+    PORT=`expr 11310 + $N`
+    RPCPORT=`expr 11320 + $N`
+    echo Starting node $N on port $PORT
+    mkdir -p ~/fullnode/node-$N
+    rm -Rf ~/fullnode/node-$n/dash.conf
+
+    for NN in `echo 1 2 3 4 5 6 7 8`; do
+	if [ "$N" != "$NN" ]; then
+	    NPORT=`expr 11310 + $NN`
+	    echo "addnode=dash-node-$NN:11303" >>~/fullnode/node-$N/dash.conf
+	fi
+    done
+
+    sudo docker run -ti -d --name=fullnode-$N \
+	--restart=unless-stopped \
+	-v ~/fullnode/node-$N:/home/fullnode/.dashcore \
+	-v $PWD/hosts:/etc/hosts:ro \
+	-p $PORT:11303 -p $RPCPORT:11305 -u fullnode fullnode \
+	/home/fullnode/dashd -listen -gen -server -rest -rpcuser=rpc -rpcpassword=123 \
+	    -rpcallowip=10.0.0.0/8 -rpcallowip=192.168.0.0/16 -rpcallowip=127.0.0.0/8 -rpcallowip=172.0.0.0/8 -rpcbind=0.0.0.0 -rpcthreads=2
+done

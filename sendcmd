@@ -1,0 +1,9 @@
+#!/bin/bash
+CMD=$@
+if [ "$1" = "" ]; then
+    CMD="getaccountaddress \"\""
+fi
+for N in `echo 1 2 3 4 5 6 7 8`; do
+    echo -n "fullnode-$N: "
+    dash-cli -rpcconnect=127.0.0.1 -rpcport=1132$N -rpcuser=rpc -rpcpassword=123 $CMD
+done
